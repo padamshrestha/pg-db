@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app1:
+    image: node:18-alpine
+    command: sh -c "npm install && npm start"
+    working_dir: /app
+    volumes:
+      - ./src:/app           # Mount app1's source code
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: app1_db
+      DB_USER: app1_user
+      DB_PASSWORD: app1_password
+    networks:
+      - shared_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  shared_network:
+    external: true           # Reuse network from PostgreSQL

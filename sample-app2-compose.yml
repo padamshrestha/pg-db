@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app2:
+    image: python:3.11-slim
+    command: sh -c "pip install -r requirements.txt && python app.py"
+    working_dir: /app
+    volumes:
+      - ./src:/app           # Mount app2's source code
+    environment:
+      DATABASE_URL: postgresql://app2_user:app2_password@postgres:5432/app2_db
+    networks:
+      - shared_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  shared_network:
+    external: true

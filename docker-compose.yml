@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    build: .
+    container_name: timescaledb_container  # ✅ Prevents Docker from using a random name
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: tradesmart
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password  # ✅ Correct way
+    secrets:
+      - postgres_password
+    networks:
+      - shared_network
+    ports:
+      - "5434:5432"  # Expose PostgreSQL on port 5434
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tradesmart -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # ✅ Explicitly mount the volume
+
+  backup:
+    build: ./backup
+    container_name: backup_container
+    volumes:
+      - ./backup/backup.sh:/backup.sh
+      - ./backup/restore.sh:/restore.sh      
+      - ./backup/entrypoint.sh:/entrypoint.sh
+      - /Volumes/SG-RAID/media.warehouse/db_backup:/backups
+    environment:
+      PG_HOST: timescaledb
+      PG_USER: tradesmart
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    networks:
+      - shared_network  # ✅ Ensure backup_container is on the correct network
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  backup_data:
+    driver: local
+
+secrets:
+  postgres_password:
+    file: ./postgres_password.txt
+
+networks:
+  shared_network:
+    name: shared_network

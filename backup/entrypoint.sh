@@ -12,15 +12,9 @@ echo "✅ Database is ready!"
 mkdir -p /backups/logs
 chmod +x /scripts/*.sh
 
-# ✅ Define cron job for 8 AM UTC => 12 AM PST
-CRON_TIME="0 8 * * *"
-BACKUP_COMMAND="/scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1"
-
-# ✅ Set up the cron job
+# ✅ Set up cron job (now based on local timezone)
 echo "⏳ Configuring scheduled backups..."
-echo "🕒 Scheduled backup time (UTC): $CRON_TIME"
-echo "SHELL=/bin/sh" > /etc/crontabs/root  # Ensure cron uses the correct shell
-echo "$CRON_TIME $BACKUP_COMMAND" >> /etc/crontabs/root  # Write to cron file
+echo "* 8 * * * /scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1" | crontab -
 
 # ✅ Verify cron jobs before starting
 echo "🔍 Current cron jobs:"

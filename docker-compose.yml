@@ -30,7 +30,8 @@ services:
       - ./backup/backup.sh:/backup.sh
       - ./backup/restore.sh:/restore.sh      
       - ./backup/entrypoint.sh:/entrypoint.sh
-      - /Volumes/SG-RAID/media.warehouse/db_backup:/backups
+      - ./backup/bk-crons:/etc/cron.d/bk-crons
+      - /Volumes/SG-RAID/media.warehouse/db_backup:/backups      
     environment:
       PG_HOST: timescaledb
       PG_USER: tradesmart

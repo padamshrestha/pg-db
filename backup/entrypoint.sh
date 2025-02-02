@@ -12,17 +12,25 @@ echo "✅ Database is ready!"
 mkdir -p /backups/logs
 chmod +x /scripts/*.sh
 
-# ✅ Set up cron job (now based on local timezone)
-echo "⏳ Configuring scheduled backups..."
-echo "* 8 * * * /scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1" | crontab -
+# ✅ Capture runtime environment variables dynamically at container startup
+printenv > /etc/environment
 
-# ✅ Verify cron jobs before starting
+# Ensure cron jobs are registered from mounted file
+CRON_FILE="/etc/cron.d/bk-crons"
+if [ -f "$CRON_FILE" ]; then
+    echo "Registering cron jobs from mounted file..."
+    cat "$CRON_FILE" > /var/spool/cron/crontabs/root
+    chmod 0600 /var/spool/cron/crontabs/root
+else
+    echo "⚠ WARNING: Cron jobs file not found at $CRON_FILE! Skipping cron registration."
+fi
+
 echo "🔍 Current cron jobs:"
 crontab -l
 
-# Start cron daemon in foreground
-echo "🔄 Starting cron daemon..."
-crond &  # ✅ Run in background so script continues
+# Start 'crond' in the foreground so Docker keeps the container alive.
+echo "🔄 Starting cron daemon (foreground)..."
+exec crond -f -l 8
 
 # Keep container running
 echo "👂 Listening for cron logs..."

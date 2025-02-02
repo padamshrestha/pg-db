@@ -2,7 +2,12 @@
 
 ## Run
 ```console
-docker compose up --build
+docker compose up
+```
+
+in background
+```console
+docker compose up -d
 ```
 
 With rebuild

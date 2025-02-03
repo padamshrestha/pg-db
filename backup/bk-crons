@@ -1,5 +1,5 @@
 # Every midnight 12 AM PST 
-* 8 * * * /scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1
+0 8 * * * /scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1
 
 # For testing
 # 48 17 * * * /scripts/backup.sh >> /backups/logs/cron_backup.log 2>&1
